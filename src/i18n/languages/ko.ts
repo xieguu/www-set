@@ -537,4 +537,6 @@ export const ko: Translation = {
 	[Key.exitImmersiveReading]: "몰입형 읽기 종료",
 	[Key.tocExpand]: "목차 펼치기",
 	[Key.tocCollapse]: "목차 접기",
+	[Key.konamiUnlocked]: "푸리나, 화려하게 등장!",
+	[Key.konamiUnlockedDesc]: "모두의 시선 속, 박수갈채는 그대의 것 🎭",
 };

@@ -4,6 +4,31 @@ import type { ImageFormat } from "../types/config";
 
 const { randomCoverImage } = coverImageConfig;
 
+// ---- 本地随机封面 --------------------------------------------------------
+// 文章 frontmatter 写 image: "auto" 时，从下面目录随机取一张作封面。
+// 与壁纸复用同一目录 DesktopWallpaper（用户需求）。import.meta.glob 需静态字面量。
+// 取图按文章 id 做确定性 hash —— 每篇固定一张、不同文章尽量不同、刷新不变。
+export const AUTO_COVER = "auto";
+const localCoverFiles = import.meta.glob(
+	"../assets/images/DesktopWallpaper/*.{png,jpg,jpeg,webp,avif}",
+);
+// glob 键形如 "../assets/images/.../x.png"，转成 CoverImage 认识的 src 相对路径
+const localCoverPaths: string[] = Object.keys(localCoverFiles)
+	.map((key) => key.replace(/^\.\.\//, ""))
+	.sort();
+
+/** image 是否为「本地随机封面」标记 */
+export function isAutoCover(image: string | undefined): boolean {
+	return image === AUTO_COVER;
+}
+
+/** 按 seed 从本地封面目录确定性地取一张（目录为空则返回空串） */
+function pickLocalCover(seed?: string): string {
+	if (localCoverPaths.length === 0) return "";
+	const hash = getSeedHash(seed);
+	return localCoverPaths[hash % localCoverPaths.length];
+}
+
 /**
  * 根据seed生成确定性hash值
  */
@@ -38,6 +63,11 @@ export function processCoverImageSync(
 ): string {
 	if (!image || image === "") {
 		return "";
+	}
+
+	// "auto"：从本地封面目录确定性取一张（src 相对路径，调用方需传 basePath=""）
+	if (image === AUTO_COVER) {
+		return pickLocalCover(seed);
 	}
 
 	if (image !== "api") {

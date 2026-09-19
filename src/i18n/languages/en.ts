@@ -540,4 +540,6 @@ export const en: Translation = {
 	[Key.exitImmersiveReading]: "Exit Immersive Reading",
 	[Key.tocExpand]: "Expand directory",
 	[Key.tocCollapse]: "Collapse directory",
+	[Key.konamiUnlocked]: "Furina takes the stage!",
+	[Key.konamiUnlockedDesc]: "All eyes on you — the applause is yours 🎭",
 };

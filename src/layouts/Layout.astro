@@ -9,6 +9,7 @@ import FontSetup from "@components/features/FontSetup.astro";
 import GithubCardManager from "@components/features/GithubCardManager.astro";
 import MusicManager from "@components/features/MusicManager.astro";
 import MusicPlayerView from "@components/features/MusicPlayerView.astro";
+import KonamiEasterEgg from "@components/features/KonamiEasterEgg.astro";
 import SakuraEffect from "@components/features/SakuraEffect.astro";
 import WavesEffect from "@components/features/WavesEffect.astro";
 import ConfigCarrier from "@components/layout/ConfigCarrier.astro";
@@ -578,6 +579,9 @@ const ogImageAlt = propsOgImageAlt ?? pageTitle;
 
     <!-- GitHub 卡片客户端实时补全（forks/stars） -->
     <GithubCardManager />
+
+    <!-- 秘技码彩蛋（↑↑↓↓←→←→BA） -->
+    <KonamiEasterEgg />
   </body>
 </html>
 

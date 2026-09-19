@@ -1,0 +1,258 @@
+---
+// 秘技码彩蛋：依次按下 konamiConfig.sequence（默认 ↑↑↓↓←→←→BA）即可触发一段
+// 庆祝动画——顶部气泡提示 + emoji 飘落。监听器绑定在 document 上、组件渲染在
+// #swup-container 之外，因此跨 Swup 切页仍然生效，无需按页重复注册。
+// 配置见 src/config/konamiConfig.ts。
+import { konamiConfig } from "@/config";
+import I18nKey from "@/i18n/i18nKey";
+import { i18n } from "@/i18n/translation";
+
+const enabled = konamiConfig.enable;
+const title = i18n(I18nKey.konamiUnlocked);
+const desc = i18n(I18nKey.konamiUnlockedDesc);
+---
+
+{
+	enabled && (
+		<div
+			id="konami-egg-config"
+			data-title={title}
+			data-desc={desc}
+			style="display:none"
+			aria-hidden="true"
+		/>
+	)
+}
+
+<script>
+	import { konamiConfig } from "@/config";
+
+	(function setupKonami() {
+		// Swup 切页会重跑模块脚本，用 window 守卫确保只注册一次
+		if (window.__fireflyKonamiInit) return;
+		window.__fireflyKonamiInit = true;
+
+		if (!konamiConfig.enable) return;
+
+		const DEFAULT_SEQUENCE = [
+			"ArrowUp",
+			"ArrowUp",
+			"ArrowDown",
+			"ArrowDown",
+			"ArrowLeft",
+			"ArrowRight",
+			"ArrowLeft",
+			"ArrowRight",
+			"b",
+			"a",
+		];
+		const DEFAULT_EMOJIS = ["🎉", "✨", "🎊", "🌸", "⭐", "🎈", "💫", "🍥"];
+
+		const sequence = (
+			konamiConfig.sequence && konamiConfig.sequence.length
+				? konamiConfig.sequence
+				: DEFAULT_SEQUENCE
+		).map((k) => k.toLowerCase());
+		const emojis =
+			konamiConfig.emojis && konamiConfig.emojis.length
+				? konamiConfig.emojis
+				: DEFAULT_EMOJIS;
+		const duration =
+			typeof konamiConfig.duration === "number" ? konamiConfig.duration : 4000;
+
+		let progress = 0;
+		let active = false;
+
+		document.addEventListener("keydown", (e) => {
+			// 用户正在输入时不拦截按键
+			const target = e.target as HTMLElement | null;
+			if (
+				target &&
+				(target.tagName === "INPUT" ||
+					target.tagName === "TEXTAREA" ||
+					target.isContentEditable)
+			) {
+				return;
+			}
+
+			const key = e.key.toLowerCase();
+			if (key === sequence[progress]) {
+				progress++;
+				if (progress === sequence.length) {
+					progress = 0;
+					trigger();
+				}
+			} else {
+				// 匹配失败时重置；若当前键正好是序列首键则从第 1 步继续（如连按上）
+				progress = key === sequence[0] ? 1 : 0;
+			}
+		});
+
+		function trigger() {
+			if (active) return;
+			active = true;
+
+			const cfgEl = document.getElementById("konami-egg-config");
+			const title = cfgEl?.getAttribute("data-title") || "🎉";
+			const desc = cfgEl?.getAttribute("data-desc") || "";
+
+			showToast(title, desc);
+			rainEmojis();
+
+			window.setTimeout(() => {
+				active = false;
+			}, duration + 800);
+		}
+
+		function showToast(title: string, desc: string) {
+			const toast = document.createElement("div");
+			toast.className = "konami-toast";
+			toast.setAttribute("role", "status");
+
+			const icon = document.createElement("span");
+			icon.className = "konami-toast-icon";
+			icon.textContent = "🎭";
+
+			const text = document.createElement("div");
+			const t = document.createElement("div");
+			t.className = "konami-toast-title";
+			t.textContent = title;
+			text.appendChild(t);
+			if (desc) {
+				const d = document.createElement("div");
+				d.className = "konami-toast-desc";
+				d.textContent = desc;
+				text.appendChild(d);
+			}
+
+			toast.appendChild(icon);
+			toast.appendChild(text);
+			document.body.appendChild(toast);
+
+			// 双 rAF 确保初始态先上屏，过渡动画才会触发
+			requestAnimationFrame(() =>
+				requestAnimationFrame(() => toast.classList.add("show")),
+			);
+
+			window.setTimeout(() => {
+				toast.classList.remove("show");
+				window.setTimeout(() => toast.remove(), 500);
+			}, duration);
+		}
+
+		function rainEmojis() {
+			// 尊重「减少动态效果」偏好：仅保留气泡提示，不做飘落动画
+			if (
+				window.matchMedia &&
+				window.matchMedia("(prefers-reduced-motion: reduce)").matches
+			) {
+				return;
+			}
+
+			const layer = document.createElement("div");
+			layer.className = "konami-emoji-layer";
+			document.body.appendChild(layer);
+
+			const count = 42;
+			let maxSpan = 0;
+			for (let i = 0; i < count; i++) {
+				const span = document.createElement("span");
+				span.className = "konami-emoji";
+				span.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+
+				const delay = Math.random() * 1.2;
+				const dur = 2.4 + Math.random() * 2.2;
+				const rot = `${Math.random() * 720 - 360}deg`;
+				span.style.left = `${Math.random() * 100}vw`;
+				span.style.fontSize = `${1.1 + Math.random() * 1.4}rem`;
+				span.style.animationDelay = `${delay}s`;
+				span.style.animationDuration = `${dur}s`;
+				span.style.setProperty("--k-rot", rot);
+
+				layer.appendChild(span);
+				maxSpan = Math.max(maxSpan, delay + dur);
+			}
+
+			window.setTimeout(() => layer.remove(), (maxSpan + 0.6) * 1000);
+		}
+	})();
+</script>
+
+<style is:global>
+	.konami-toast {
+		position: fixed;
+		top: 4.5rem;
+		left: 50%;
+		z-index: 9999;
+		display: flex;
+		align-items: center;
+		gap: 0.6rem;
+		max-width: min(90vw, 24rem);
+		padding: 0.7rem 1.2rem;
+		border-radius: 1rem;
+		/* 芙宁娜配色：白 + 水蓝的磨砂玻璃，金色描边，水色辉光 */
+		background: linear-gradient(
+			135deg,
+			rgba(246, 252, 255, 0.94),
+			rgba(209, 238, 250, 0.9)
+		);
+		color: #0e4a63;
+		border: 1px solid rgba(230, 200, 110, 0.85);
+		box-shadow:
+			0 12px 40px rgba(18, 60, 92, 0.28),
+			0 0 28px rgba(95, 201, 232, 0.55);
+		backdrop-filter: blur(12px) saturate(1.4);
+		-webkit-backdrop-filter: blur(12px) saturate(1.4);
+		opacity: 0;
+		transform: translateX(-50%) translateY(-24px) scale(0.96);
+		transition:
+			opacity 0.35s ease,
+			transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+		pointer-events: none;
+	}
+	.konami-toast.show {
+		opacity: 1;
+		transform: translateX(-50%) translateY(0) scale(1);
+	}
+	.konami-toast-icon {
+		font-size: 1.5rem;
+		line-height: 1;
+	}
+	.konami-toast-title {
+		font-weight: 700;
+		font-size: 0.95rem;
+	}
+	.konami-toast-desc {
+		font-size: 0.8rem;
+		opacity: 0.82;
+		margin-top: 0.1rem;
+	}
+
+	.konami-emoji-layer {
+		position: fixed;
+		inset: 0;
+		z-index: 9998;
+		overflow: hidden;
+		pointer-events: none;
+	}
+	.konami-emoji {
+		position: absolute;
+		top: -10vh;
+		user-select: none;
+		will-change: transform, opacity;
+		animation: konami-fall linear forwards;
+	}
+	@keyframes konami-fall {
+		0% {
+			transform: translateY(-10vh) rotate(0deg);
+			opacity: 0;
+		}
+		10% {
+			opacity: 1;
+		}
+		100% {
+			transform: translateY(110vh) rotate(var(--k-rot, 360deg));
+			opacity: 0.9;
+		}
+	}
+</style>

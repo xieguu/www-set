@@ -537,4 +537,6 @@ export const ja: Translation = {
 	[Key.exitImmersiveReading]: "没入型リーディングを終了する",
 	[Key.tocExpand]: "目錄を開く",
 	[Key.tocCollapse]: "目錄をたたむ",
+	[Key.konamiUnlocked]: "フリーナ、華麗に登場！",
+	[Key.konamiUnlockedDesc]: "注目の中、喝采はすべて君に 🎭",
 };

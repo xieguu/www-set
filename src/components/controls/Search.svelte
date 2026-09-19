@@ -8,10 +8,13 @@ import type { SearchResult } from "@/global";
 import { FLOATING_PANEL_CLOSE_EVENT } from "@/utils/floating-panel-utils";
 import { url as formatUrl, getSearchUrl } from "@/utils/url-utils";
 
+const SEARCH_PREVIEW_LIMIT = 5;
+
 // --- State ---
 let keywordDesktop = "";
 let keywordMobile = "";
 let result: SearchResult[] = [];
+let totalResults = 0;
 let isSearching = false;
 let initialized = false;
 let debounceTimer: NodeJS.Timeout;
@@ -61,11 +64,7 @@ const handleDesktopFocus = (event: FocusEvent): void => {
 
 const setPanelVisibility = (show: boolean, isDesktop: boolean): void => {
 	const panel = document.getElementById("search-panel");
-	if (
-		!panel ||
-		(isDesktop && !keywordDesktop) ||
-		(!isDesktop && !keywordMobile)
-	)
+	if (!panel || (show && (isDesktop ? !keywordDesktop : !keywordMobile)))
 		return;
 	show
 		? panel.classList.remove("float-panel-closed")
@@ -77,6 +76,7 @@ const closeSearchPanel = (): void => {
 	keywordDesktop = "";
 	keywordMobile = "";
 	result = [];
+	totalResults = 0;
 };
 
 const cancelPendingSearch = (): void => {
@@ -93,13 +93,14 @@ const handleResultClick = (event: Event, url: string): void => {
 
 // --- Core Search Logic ---
 const search = async (keyword: string, isDesktop: boolean): Promise<void> => {
+	if (!initialized) return;
 	if (!keyword) {
 		cancelPendingSearch();
 		setPanelVisibility(false, isDesktop);
 		result = [];
+		totalResults = 0;
 		return;
 	}
-	if (!initialized) return;
 
 	clearTimeout(debounceTimer);
 	const requestId = ++searchRequestId;
@@ -108,25 +109,34 @@ const search = async (keyword: string, isDesktop: boolean): Promise<void> => {
 	debounceTimer = setTimeout(async () => {
 		try {
 			let searchResults: SearchResult[] = [];
+			let searchResultCount = 0;
 
 			if (import.meta.env.PROD && window.pagefind) {
 				const response = await window.pagefind.search(keyword);
+				if (requestId !== searchRequestId) return;
+
+				searchResultCount = response.results.length;
 				searchResults = await Promise.all(
-					response.results.map((item) => item.data()),
+					response.results
+						.slice(0, SEARCH_PREVIEW_LIMIT)
+						.map((item) => item.data()),
 				);
 			} else if (import.meta.env.DEV) {
-				searchResults = fakeResult;
+				searchResultCount = fakeResult.length;
+				searchResults = fakeResult.slice(0, SEARCH_PREVIEW_LIMIT);
 			}
 
 			if (requestId !== searchRequestId) return;
 
 			result = searchResults;
+			totalResults = searchResultCount;
 			setPanelVisibility(true, isDesktop);
 		} catch (error) {
 			if (requestId !== searchRequestId) return;
 
 			console.error("Search error:", error);
 			result = [];
+			totalResults = 0;
 			setPanelVisibility(false, isDesktop);
 		} finally {
 			if (requestId === searchRequestId) {
@@ -174,12 +184,8 @@ onMount(() => {
 });
 
 // --- Reactive Statements ---
-$: if (initialized && (keywordDesktop || keywordDesktop === "")) {
-	search(keywordDesktop, true);
-}
-$: if (initialized && (keywordMobile || keywordMobile === "")) {
-	search(keywordMobile, false);
-}
+$: search(keywordDesktop, true);
+$: search(keywordMobile, false);
 </script>
 
 <!-- search bar for desktop view -->
@@ -228,7 +234,7 @@ top-20 left-4 md:left-[unset] right-4 shadow-2xl rounded-2xl p-2"
             {i18n(I18nKey.searchLoading)}
         </div>
     {:else if result.length > 0}
-        {#each result.slice(0, 5) as item}
+        {#each result as item}
             <a href={item.url}
                on:click={(e) => handleResultClick(e, item.url)}
                class="transition first-of-type:mt-2 lg:first-of-type:mt-0 group block
@@ -258,12 +264,12 @@ top-20 left-4 md:left-[unset] right-4 shadow-2xl rounded-2xl p-2"
                 {/if}
             </a>
         {/each}
-        {#if result.length > 5}
+        {#if totalResults > SEARCH_PREVIEW_LIMIT}
             <a href={getSearchUrl(keywordDesktop || keywordMobile)}
                on:click={(e) => handleResultClick(e, getSearchUrl(keywordDesktop || keywordMobile))}
                class="transition first-of-type:mt-2 lg:first-of-type:mt-0 group block rounded-xl text-lg px-3 py-2 hover:bg-(--btn-plain-bg-hover) active:bg-(--btn-plain-bg-active) text-(--primary) font-bold text-center">
                 <span class="inline-flex items-center">
-                    {i18n(I18nKey.searchViewMore).replace('{count}', (result.length - 5).toString())}
+                    {i18n(I18nKey.searchViewMore).replace('{count}', (totalResults - SEARCH_PREVIEW_LIMIT).toString())}
                     <Icon icon="fa7-solid:arrow-right" class="transition text-[0.75rem] ml-1"></Icon>
                 </span>
             </a>

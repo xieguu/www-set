@@ -527,4 +527,6 @@ export const zh_CN: Translation = {
 	[Key.exitImmersiveReading]: "退出沉浸阅读",
 	[Key.tocExpand]: "展开目录",
 	[Key.tocCollapse]: "折叠目录",
+	[Key.konamiUnlocked]: "芙宁娜华丽登场！",
+	[Key.konamiUnlockedDesc]: "全场目光聚于此刻，掌声献给你 🎭",
 };

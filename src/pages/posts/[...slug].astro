@@ -34,7 +34,11 @@ import { profileConfig } from "@/config/profileConfig";
 import { siteConfig } from "@/config/siteConfig";
 import { sponsorConfig } from "@/config/sponsorConfig";
 import { formatDateToYYYYMMDD } from "@/utils/date-utils";
-import { getApiUrlList, processCoverImageSync } from "@/utils/image-utils";
+import {
+	getApiUrlList,
+	isAutoCover,
+	processCoverImageSync,
+} from "@/utils/image-utils";
 import {
 	getAuthorAvatarUrl,
 	getSiteLogo,
@@ -108,7 +112,10 @@ const posterAvatarSelector = profileConfig.avatar
 
 dayjs.extend(utc);
 
-const coverBasePath = getFileDirFromPath(entry.filePath || "");
+// image: "auto" 的封面是 src 根相对路径（assets/images/...），basePath 须为空
+const coverBasePath = isAutoCover(entry.data.image)
+	? ""
+	: getFileDirFromPath(entry.filePath || "");
 const coverImage =
 	(await toAbsoluteImageInfo(
 		processedImage,
@@ -257,7 +264,7 @@ const seriesData = await getSeriesPosts(entry);
             <CoverImage
               id="post-cover"
               src={processedImage}
-              basePath={getFileDirFromPath(entry.filePath || "")}
+              basePath={coverBasePath}
               alt={entry.data.title}
               class="h-full"
               preview={false}
@@ -416,7 +423,7 @@ const seriesData = await getSeriesPosts(entry);
             <CoverImage
               id="post-cover"
               src={processedImage}
-              basePath={getFileDirFromPath(entry.filePath || "")}
+              basePath={coverBasePath}
               alt={entry.data.title}
               class="mb-8 rounded-xl onload-animation"
               preview={false}

@@ -47,3 +47,10 @@ package/
 .codex*
 .claude
 .mimocode
+
+# local pnpm store
+.pnpm-store/
+
+# apk build artifacts
+apk/
+*.apk

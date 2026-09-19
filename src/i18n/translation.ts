@@ -1,49 +1,23 @@
-import { siteConfig } from "../config";
+// 只包含「当前站点语言」这一个语言包，由 astro.config.mjs 的
+// activeTranslationPlugin 在构建期按 siteConfig.lang 解析生成。
+// 这样客户端 island 不再打包用不到的其余语言（此前 6 种全量打进 translation chunk）。
+import { activeTranslation } from "virtual:active-translation";
 import type I18nKey from "./i18nKey";
 import { en } from "./languages/en";
-import { ja } from "./languages/ja";
-import { ko } from "./languages/ko";
-import { ru } from "./languages/ru";
-import { zh_CN } from "./languages/zh_CN";
-import { zh_TW } from "./languages/zh_TW";
 
 export type Translation = {
 	[K in I18nKey]: string;
 };
 
+// en 作为最终兜底：当前语言缺某个 key（留空）时回退，保证不出现空串。
 const defaultTranslation = en;
 
-const map: { [key: string]: Translation } = {
-	en: en,
-	en_us: en,
-	en_gb: en,
-	en_au: en,
-	zh_cn: zh_CN,
-	zh_tw: zh_TW,
-	ja: ja,
-	ja_jp: ja,
-	ru: ru,
-	ru_ru: ru,
-	ko: ko,
-	ko_kr: ko,
-};
-
-export function getTranslation(lang: string): Translation {
-	return map[lang.toLowerCase()] || defaultTranslation;
+// 站点语言在构建期固定，运行时只存在 activeTranslation。
+// 保留形参仅为兼容旧签名（此前会按传入语言查表）。
+export function getTranslation(_lang?: string): Translation {
+	return activeTranslation;
 }
 
 export function i18n(key: I18nKey): string {
-	const lang = siteConfig.lang || "en";
-	const currentLang = getTranslation(lang);
-	const value = currentLang[key];
-
-	// 如果当前语言没有翻译（或为空），则使用中文作为备选
-	if (!value && lang.toLowerCase() !== "zh_cn") {
-		const chineseValue = zh_CN[key];
-		if (chineseValue) {
-			return chineseValue;
-		}
-	}
-
-	return value || defaultTranslation[key];
+	return activeTranslation[key] || defaultTranslation[key];
 }

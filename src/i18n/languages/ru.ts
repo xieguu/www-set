@@ -541,4 +541,6 @@ export const ru: Translation = {
 	[Key.exitImmersiveReading]: "Выйти из режима чтения",
 	[Key.tocExpand]: "Развернуть оглавление",
 	[Key.tocCollapse]: "Свернуть оглавление",
+	[Key.konamiUnlocked]: "Фурина выходит на сцену!",
+	[Key.konamiUnlockedDesc]: "Все взгляды на тебя — овации твои 🎭",
 };

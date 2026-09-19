@@ -6,7 +6,11 @@ import CoverImage from "@/components/common/CoverImage.astro";
 import PostMetadata from "@/components/layout/PostMeta.astro";
 import PostStats from "@/components/layout/PostStats.astro";
 import { siteConfig } from "@/config";
-import { getApiUrlList, processCoverImageSync } from "@/utils/image-utils";
+import {
+	getApiUrlList,
+	isAutoCover,
+	processCoverImageSync,
+} from "@/utils/image-utils";
 import { getFileDirFromPath, getTagUrl } from "@/utils/url-utils";
 
 interface Props {
@@ -248,7 +252,7 @@ const minutes = remarkPluginFrontmatter.minutes;
         </div>
         <CoverImage
           src={processedImage}
-          basePath={getFileDirFromPath(entry.filePath || "")}
+          basePath={isAutoCover(image) ? "" : getFileDirFromPath(entry.filePath || "")}
           alt={title}
           class="w-full h-full transition-transform duration-300 group-hover:scale-110 group-active:scale-115"
           preview={true}

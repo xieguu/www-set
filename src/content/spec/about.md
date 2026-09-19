@@ -1,21 +1,21 @@
-# 关于我 / About Me
+# 关于本座 / About Furina
 
-你好！我是 **夏叶** ，一个在数字世界中默默无闻的一片叶子。
+诸位好。本座乃 **芙宁娜·德·枫丹**——众水的女王，正义之神，也是这座独幕剧场永远的主角。
 
-## 🛠️ 关于本站
+在这里，本座会为你上演一场又一场好戏：角色档案、剧情故事、经典台词、名场面……只要你愿意驻足，聚光灯便永远为你亮着。
 
-这个网站使用 **Astro** 框架构建，采用了 [Firefly](https://github.com/CuteLeaf/Firefly) 模板，Firefly 是基于 [Fuwari](https://github.com/saicaca/fuwari) 的二次开发。
+## 🎭 关于这座剧场
 
-**Firefly** 是一款基于 Astro 框架和 Fuwari 模板开发的清新美观且现代化个人博客主题模板，专为技术爱好者和内容创作者设计。该主题融合了现代 Web 技术栈，提供了丰富的功能模块和高度可定制的界面，让您能够轻松打造出专业且美观的个人博客网站。
+- **主角**：芙宁娜（Furina / Focalors）
+- **舞台**：枫丹（Fontaine）
+- **主题**：华丽、戏剧、以及藏在面具之下的深情
+- **开场白**：全场目光，聚于此刻！
 
+> 台上的每一句台词、每一个转身，都是本座为你精心排演的。所以，请不要吝啬你的掌声。
 
-**🖥️在线预览： [Firefly - Demo site](https://firefly.cuteleaf.cn/)**
+## 🛠️ 关于技术
 
-**📝Firefly使用文档： [https://docs-firefly.cuteleaf.cn](https://docs-firefly.cuteleaf.cn/)**
-
-**⭐Firefly开源地址：[https://github.com/CuteLeaf/Firefly](https://github.com/CuteLeaf/Firefly)** 
-
-**⭐Fuwari开源地址：[https://github.com/saicaca/fuwari](https://github.com/saicaca/fuwari)**
+这座剧场基于 **Astro** 框架搭建，使用了 [Firefly](https://github.com/CuteLeaf/Firefly) 主题（源自 [Fuwari](https://github.com/saicaca/fuwari) 的二次开发）。在此一并致谢这些优秀的开源作品。
 
 ::github{repo="CuteLeaf/Firefly"}
 
@@ -23,5 +23,4 @@
 
 ---
 
-*感谢你的来访！希望在这里能找到对你有用的内容！*
-
+*感谢你莅临本座的舞台。谢幕之前，好戏才刚刚开场——常来坐坐吧。*

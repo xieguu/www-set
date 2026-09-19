@@ -37,7 +37,15 @@ import {
 	siteConfig,
 } from "./src/config";
 import I18nKey from "./src/i18n/i18nKey";
-import { i18n } from "./src/i18n/translation";
+// 直接引入语言对象，不经过 src/i18n/translation.ts —— 后者会 import 只在 Vite 构建期
+// 存在的虚拟模块 virtual:active-translation，而 astro.config 在纯 Node 环境下加载，
+// 无法解析该虚拟模块。配置里只用到几条固定文案，自己取词即可。
+import { en } from "./src/i18n/languages/en";
+import { ja } from "./src/i18n/languages/ja";
+import { ko } from "./src/i18n/languages/ko";
+import { ru } from "./src/i18n/languages/ru";
+import { zh_CN } from "./src/i18n/languages/zh_CN";
+import { zh_TW } from "./src/i18n/languages/zh_TW";
 import { GithubCardComponent } from "./src/plugins/rehype-component-github-card.mjs";
 import { rehypeDiagramPanZoom } from "./src/plugins/rehype-diagram-panzoom.mjs";
 import rehypeEmailProtection from "./src/plugins/rehype-email-protection.mjs";
@@ -57,6 +65,47 @@ import { collectUsedFontCssVars } from "./src/utils/fontHelper";
 
 if (process.env.NODE_ENV === "development") {
 	setMaxListeners(20);
+}
+
+// 站点语言在构建期固定。用一个 Vite 虚拟模块只导出「当前语言」这一个语言包，
+// 让 src/i18n/translation.ts 不必静态 import 全部 6 种语言——否则 Rollup 无法基于
+// 运行时分支 tree-shake，客户端 island 会白白打包用不到的 5 种语言（约 80KB）。
+const LANGS = { en, ja, ko, ru, zh_CN, zh_TW };
+const FILE_BY_LANG = {
+	zh_cn: "zh_CN",
+	zh_tw: "zh_TW",
+	ja: "ja",
+	ja_jp: "ja",
+	ru: "ru",
+	ru_ru: "ru",
+	ko: "ko",
+	ko_kr: "ko",
+	en: "en",
+	en_us: "en",
+	en_gb: "en",
+	en_au: "en",
+};
+// 当前站点语言对应的语言模块名（与 src/i18n/languages/*.ts 的导出名一致）
+const ACTIVE_LANG_NAME =
+	FILE_BY_LANG[(siteConfig.lang || "en").toLowerCase()] || "en";
+
+// 配置内部取词助手：优先当前语言，缺失时回退英文（与运行时 i18n 行为一致）
+const t = (key) => LANGS[ACTIVE_LANG_NAME][key] || en[key];
+
+function activeTranslationPlugin() {
+	const virtualId = "virtual:active-translation";
+	const resolvedId = `\0${virtualId}`;
+	return {
+		name: "firefly-active-translation",
+		resolveId(id) {
+			if (id === virtualId) return resolvedId;
+		},
+		load(id) {
+			if (id === resolvedId) {
+				return `export { ${ACTIVE_LANG_NAME} as activeTranslation } from "/src/i18n/languages/${ACTIVE_LANG_NAME}";`;
+			}
+		},
+	};
 }
 
 const adapter = process.env.CF_WORKERS
@@ -191,10 +240,10 @@ export default defineConfig({
 								defaultCollapsed:
 									expressiveCodeConfig.pluginCollapsible.defaultCollapsed ??
 									true,
-								expandButtonText: i18n(I18nKey.codeCollapsibleShowMore),
-								collapseButtonText: i18n(I18nKey.codeCollapsibleShowLess),
-								expandedAnnouncement: i18n(I18nKey.codeCollapsibleExpanded),
-								collapsedAnnouncement: i18n(I18nKey.codeCollapsibleCollapsed),
+								expandButtonText: t(I18nKey.codeCollapsibleShowMore),
+								collapseButtonText: t(I18nKey.codeCollapsibleShowLess),
+								expandedAnnouncement: t(I18nKey.codeCollapsibleExpanded),
+								collapsedAnnouncement: t(I18nKey.codeCollapsibleCollapsed),
 							}),
 						]
 					: []),
@@ -351,7 +400,7 @@ export default defineConfig({
 		}),
 	},
 	vite: {
-		plugins: [tailwindcss()],
+		plugins: [tailwindcss(), activeTranslationPlugin()],
 		server: {
 			watch: {
 				ignored: ["**/package/**", "**/Firefly-docs/**"],

@@ -21,6 +21,8 @@ const JS_TYPES = new Set([
 	"module",
 ]);
 
+const minifiedScriptCache = new Map<string, string>();
+
 /**
  * 判断某段 <script> 是否该压缩：
  * 外链的没有内容可压；type 不是 JS 的（application/ld+json、text/template、
@@ -35,6 +37,9 @@ function shouldMinify(attrs: string): boolean {
 
 function minifyInline(code: string, file: string): string {
 	if (!code.trim()) return code;
+	const cached = minifiedScriptCache.get(code);
+	if (cached !== undefined) return cached;
+
 	try {
 		const result = transformSync(code, {
 			loader: "js",
@@ -46,12 +51,15 @@ function minifyInline(code: string, file: string): string {
 			minifyIdentifiers: false,
 		});
 		// 压完不能出现 </script，否则会提前闭合标签
-		if (/<\/script/i.test(result.code)) return code;
+		if (/<\/script/i.test(result.code)) {
+			throw new Error("Minified script contains an unescaped closing tag");
+		}
+		minifiedScriptCache.set(code, result.code);
 		return result.code;
 	} catch (err) {
-		const message = err instanceof Error ? err.message : String(err);
-		console.warn(`   ⚠ Skipped a script in ${file}: ${message}`);
-		return code;
+		throw new Error(`Failed to minify an inline script in ${file}`, {
+			cause: err,
+		});
 	}
 }
 
@@ -90,7 +98,7 @@ async function main() {
 
 	const savedKiB = (savedBytes / 1024).toFixed(1);
 	console.log(
-		`✨ Minified ${scriptCount} inline scripts in ${touchedFiles}/${htmlFiles.length} HTML files, saved ${savedKiB} KiB`,
+		`✨ Minified ${scriptCount} inline scripts (${minifiedScriptCache.size} unique) in ${touchedFiles}/${htmlFiles.length} HTML files, saved ${savedKiB} KiB`,
 	);
 }
 

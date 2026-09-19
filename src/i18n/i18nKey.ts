@@ -521,6 +521,10 @@ enum I18nKey {
 	exitImmersiveReading = "exitImmersiveReading",
 	tocExpand = "tocExpand",
 	tocCollapse = "tocCollapse",
+
+	// 秘技码彩蛋 (Konami code easter egg)
+	konamiUnlocked = "konamiUnlocked",
+	konamiUnlockedDesc = "konamiUnlockedDesc",
 }
 
 export default I18nKey;
