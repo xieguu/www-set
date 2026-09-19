@@ -18,7 +18,10 @@ import { i18n } from "@/i18n/translation";
 import type { NavBarLink } from "@/types/config";
 import { getFallbackFormat, getImageFormats } from "@/utils/image-utils";
 import { isHomePage } from "@/utils/layout-utils";
-import { resolveNavMenuLinks } from "@/utils/nav-menu-utils";
+import {
+	resolveNavMenuLinks,
+	resolveTopRightLink,
+} from "@/utils/nav-menu-utils";
 import { url } from "@/utils/url-utils";
 import DropdownMenu from "./DropdownMenu.astro";
 
@@ -51,6 +54,17 @@ const navbarBlur =
 
 // 获取导航栏标题，如果没有设置则使用 siteConfig.title
 const navbarTitle = siteConfig.navbar.title || siteConfig.title;
+
+// 右上角跳转按钮配置（解析逻辑与移动抽屉共用）
+const topRight = resolveTopRightLink();
+// 移动端隐藏时只在 md 及以上显示；跟随主题色时用 --primary 上色
+const topRightClass = [
+	"btn-plain scale-animation rounded-lg h-11 w-11 active:scale-90 items-center justify-center",
+	topRight.hideOnMobile ? "hidden md:flex" : "flex",
+	topRight.followTheme ? "text-(--primary)" : "",
+]
+	.filter(Boolean)
+	.join(" ");
 
 // 获取导航栏宽度配置
 const navbarWidthFull = siteConfig.navbar.widthFull ?? false;
@@ -200,6 +214,17 @@ const logoVariants = await Promise.all(
                 })}
             </div>
             <div class="flex col-start-3 justify-self-end">
+                {topRight.show && (
+                    <a
+                        href={topRight.href}
+                        aria-label={topRight.title}
+                        title={topRight.title}
+                        class={topRightClass}
+                        {...(topRight.openNewTab ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                    >
+                        <Icon name={topRight.icon} class="text-[1.25rem]" />
+                    </a>
+                )}
                 <!--<SearchPanel client:load>-->
                 <Search
                     client:load

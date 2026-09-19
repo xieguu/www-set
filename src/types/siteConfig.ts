@@ -82,6 +82,16 @@ export type SiteConfig = {
 		navbarMode?: NavbarMode;
 		/** @deprecated 由 navbarMode 取代；true→fixed，false→static */
 		stickyNavbar?: boolean;
+		/** 导航栏右上角跳转按钮，点击跳转到指定地址 */
+		topRightLink?: {
+			enable?: boolean; // 是否显示按钮
+			icon?: string; // 图标名（astro-icon 库），例如 "material-symbols:rocket-launch-outline"
+			url?: string; // 跳转地址，站内路径（如 "/about/"）或完整外部链接（如 "https://..."）
+			title?: string; // 悬停提示与无障碍标签文本
+			external?: boolean; // 是否在新标签页打开，不设置时会根据是否为 http(s) 链接自动判断
+			hideOnMobile?: boolean; // 是否在移动端隐藏，仅在桌面端（>=768px）显示
+			followTheme?: boolean; // 图标是否跟随主题色，不设置则使用默认按钮颜色
+		};
 	};
 
 	// 页面开关配置
