@@ -129,6 +129,24 @@ export const siteConfig: SiteConfig = {
 		// "fixed"：固定在顶部常显
 		// "dynamic"：固定在顶部，下滑隐藏、轻微上滑显示
 		navbarMode: "dynamic",
+		// 导航栏右上角跳转按钮
+		topRightLink: {
+			// 是否显示
+			enable: true,
+			// 图标名（astro-icon 库），可在 https://icones.js.org 搜索
+			icon: "material-symbols:rocket-launch-outline",
+			// 跳转地址：站内路径（如 "/about/"）或完整外部链接（如 "https://example.com"）
+			// TODO: 替换为你要跳转的地址
+			url: "https://example.com",
+			// 悬停提示与无障碍标签
+			title: "前往",
+			// 是否在新标签页打开，不设置则外部链接自动新开、站内链接当前页跳转
+			// external: true,
+			// 是否在移动端隐藏，仅桌面端显示
+			hideOnMobile: false,
+			// 图标是否跟随主题色
+			followTheme: false,
+		},
 	},
 
 	// 站点开始日期，用于统计运行天数

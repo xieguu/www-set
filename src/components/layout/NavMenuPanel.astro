@@ -2,6 +2,7 @@
 import { Icon } from "astro-icon/components";
 import { siteConfig } from "@/config";
 import type { NavBarLink } from "@/types/config";
+import { resolveTopRightLink } from "@/utils/nav-menu-utils";
 import { url } from "@/utils/url-utils";
 
 interface Props {
@@ -10,6 +11,10 @@ interface Props {
 
 const processedLinks = Astro.props.links;
 const navTitle = siteConfig.navbar.title || siteConfig.title;
+
+// 右上角跳转按钮：仅当在移动端隐藏时，把它补进抽屉里，避免移动端无法访问
+const topRight = resolveTopRightLink();
+const showTopRightInDrawer = topRight.show && topRight.hideOnMobile;
 ---
 <div id="nav-menu-panel" class:list={["float-panel-closed fixed inset-0 z-1100"]} data-floating-panel data-floating-panel-trigger="nav-menu-switch" data-floating-panel-scroll-lock inert aria-hidden="true">
     <!-- 遮罩（scrim）：点击关闭 -->
@@ -81,6 +86,24 @@ const navTitle = siteConfig.navbar.title || siteConfig.title;
                     )}
                 </div>
             ))}
+            {showTopRightInDrawer && (
+                <div class="mobile-menu-item-root">
+                    <a
+                        href={topRight.href}
+                        class="mobile-menu-item"
+                        data-nav-href={topRight.openNewTab ? undefined : topRight.href}
+                        target={topRight.openNewTab ? "_blank" : null}
+                    >
+                        <Icon name={topRight.icon} class="mobile-menu-item-icon" />
+                        <span class="mobile-menu-item-label">{topRight.title}</span>
+                        {topRight.openNewTab ? (
+                            <Icon name="fa7-solid:arrow-up-right-from-square" class="mobile-menu-item-external text-[0.9rem] shrink-0" />
+                        ) : (
+                            <Icon name="material-symbols:chevron-right-rounded" class="mobile-menu-item-arrow" />
+                        )}
+                    </a>
+                </div>
+            )}
         </nav>
     </aside>
 </div>
