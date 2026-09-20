@@ -1,73 +1,13 @@
 import I18nKey from "@/i18n/i18nKey";
 import { i18n } from "@/i18n/translation";
-import type { VndbUlistEntry, VndbUlistResponse } from "@/types/vndb";
+import type { VndbUlistEntry } from "@/types/vndb";
 
-export const VNDB_ULIST_FIELDS: string = [
-	"id",
-	"vote",
-	"notes",
-	"started",
-	"finished",
-	"labels{label}",
-	"vn{id,title,alttitle,released,languages,platforms,image{url,thumbnail,sexual,violence},rating,votecount,length,length_minutes,developers{name},tags{name}}",
-].join(",");
-
-const VNDB_TAGS_TO_KEEP = 3;
-
-export type VndbUlistFetchOptions = {
-	apiUrl: string;
-	userId: string;
-	apiToken?: string;
-	results: number;
-	page: number;
-};
-
-export async function fetchVndbUlist(
-	options: VndbUlistFetchOptions,
-): Promise<VndbUlistResponse> {
-	const headers: Record<string, string> = {
-		Accept: "application/json",
-		"Content-Type": "application/json",
-	};
-	if (options.apiToken) {
-		headers.Authorization = `Token ${options.apiToken}`;
-	}
-
-	const response = await fetch(`${options.apiUrl}/ulist`, {
-		method: "POST",
-		headers,
-		body: JSON.stringify({
-			user: options.userId,
-			fields: VNDB_ULIST_FIELDS,
-			results: options.results,
-			page: options.page,
-		}),
-	});
-
-	if (!response.ok) {
-		throw new Error(`[VNDB] 无法获取数据 (状态码: ${response.status})`);
-	}
-
-	const data = (await response.json()) as VndbUlistResponse;
-	return {
-		...data,
-		results: data.results.map((item) => {
-			const tagNames = (item.vn?.tags || [])
-				.map((tag) => tag.name)
-				.filter(Boolean);
-			return {
-				...item,
-				labels: (item.labels || []).map(({ label }) => ({ label })),
-				vn: {
-					...item.vn,
-					developers: (item.vn?.developers || []).map(({ name }) => ({ name })),
-					tags: tagNames.slice(0, VNDB_TAGS_TO_KEEP).map((name) => ({ name })),
-					tagCount: tagNames.length,
-				},
-			};
-		}),
-	};
-}
+// 抓取逻辑抽到 vndb-fetch.ts（不依赖 i18n），此处重新导出以兼容旧 import。
+export {
+	fetchVndbUlist,
+	VNDB_ULIST_FIELDS,
+	type VndbUlistFetchOptions,
+} from "./vndb-fetch";
 
 export type VndbTab = {
 	id: string;

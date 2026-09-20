@@ -3,7 +3,7 @@ import path from "node:path";
 import sharp from "sharp";
 import { siteConfig } from "../src/config";
 import type { VndbUlistEntry } from "../src/types/vndb";
-import { fetchVndbUlist } from "../src/utils/vndb-utils";
+import { fetchVndbUlist } from "../src/utils/vndb-fetch";
 
 const OUTPUT_DIR = "public/vndb-covers";
 const COVER_WIDTH = 400;
