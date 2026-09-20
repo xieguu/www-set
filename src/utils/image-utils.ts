@@ -7,7 +7,7 @@ const { randomCoverImage } = coverImageConfig;
 // ---- 本地随机封面 --------------------------------------------------------
 // 文章 frontmatter 写 image: "auto" 时，从下面目录随机取一张作封面。
 // 与壁纸复用同一目录 DesktopWallpaper（用户需求）。import.meta.glob 需静态字面量。
-// 取图按文章 id 做确定性 hash —— 每篇固定一张、不同文章尽量不同、刷新不变。
+// 每次页面请求从本地目录随机取图；不会访问外部图片源。
 export const AUTO_COVER = "auto";
 const localCoverFiles = import.meta.glob(
 	"../assets/images/DesktopWallpaper/*.{png,jpg,jpeg,webp,avif}",
@@ -22,11 +22,10 @@ export function isAutoCover(image: string | undefined): boolean {
 	return image === AUTO_COVER;
 }
 
-/** 按 seed 从本地封面目录确定性地取一张（目录为空则返回空串） */
-function pickLocalCover(seed?: string): string {
+/** 从本地封面目录随机取一张（目录为空则返回空串） */
+function pickLocalCover(): string {
 	if (localCoverPaths.length === 0) return "";
-	const hash = getSeedHash(seed);
-	return localCoverPaths[hash % localCoverPaths.length];
+	return localCoverPaths[Math.floor(Math.random() * localCoverPaths.length)];
 }
 
 /**
@@ -65,9 +64,9 @@ export function processCoverImageSync(
 		return "";
 	}
 
-	// "auto"：从本地封面目录确定性取一张（src 相对路径，调用方需传 basePath=""）
+	// "auto"：从本地封面目录随机取一张（src 相对路径，调用方需传 basePath=""）
 	if (image === AUTO_COVER) {
-		return pickLocalCover(seed);
+		return pickLocalCover();
 	}
 
 	if (image !== "api") {
