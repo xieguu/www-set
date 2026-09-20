@@ -2,5 +2,5 @@ packages:
   - '.'
 allowBuilds:
   esbuild: true
-  micromark: true
+  micromark: false
   workerd: true
