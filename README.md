@@ -85,7 +85,7 @@ slug: post-slug
 
 | `image` 值 | 行为 |
 | --- | --- |
-| `"auto"` | 从 `src/assets/images/DesktopWallpaper/` 随机选取一张本地图片；开发服务器每次请求会重新选择，静态站点会在每次构建时重新选择。 |
+| `"auto"` | 从 `src/assets/images/DesktopWallpaper/` 随机选取一张本地图片；浏览器每次完整加载都会重新选择，连续刷新不会重复上一张。 |
 | `./cover.jpg` | 使用文章所在目录中的固定图片。 |
 | 站内或远程 URL | 直接使用指定图片地址。 |
 | `"api"` | 使用 `src/config/coverImageConfig.ts` 的远程随机图 API；当前默认关闭。 |

@@ -22,6 +22,7 @@ interface Props {
 	formats?: ImageFormat[];
 	loading?: "lazy" | "eager";
 	apiUrls?: string[];
+	autoCoverKey?: string;
 	// 高度跟随图片本身宽高比（不裁上下，只裁两边），用于文章详情页封面
 	naturalHeight?: boolean;
 }
@@ -37,6 +38,7 @@ const {
 	formats = getImageFormats(),
 	loading = "lazy",
 	apiUrls = [],
+	autoCoverKey,
 	naturalHeight = false,
 } = Astro.props;
 
@@ -86,6 +88,9 @@ const remoteReferrerPolicy =
 	class:list={[className, "cover-image-container overflow-hidden relative"]}
 	data-loading={showLoading ? "true" : "false"}
 	data-api-urls={apiUrls.length > 0 ? JSON.stringify(apiUrls) : undefined}
+	data-auto-cover-key={autoCoverKey}
+	data-cover-alt={alt || ""}
+	data-cover-loading={loading}
 	data-natural-height={naturalHeight ? "true" : undefined}
 >
 	<!-- LQIP 渐变占位 -->
@@ -104,7 +109,40 @@ const remoteReferrerPolicy =
 	</div>
 
 	<!-- 本地图片 -->
-	{isLocal && (
+	{isLocal && autoCoverKey && (
+		<>
+			<div class="auto-cover-slot w-full h-full"></div>
+			<noscript>
+				<style is:global>
+					.cover-image-container[data-auto-cover-key] .loading-spinner,
+					.cover-image-container[data-auto-cover-key] .lqip-placeholder {
+						display: none !important;
+					}
+				</style>
+				<ImageWrapper
+					src={src}
+					basePath={basePath}
+					alt={alt || ""}
+					class="w-full h-full"
+					position={position}
+					loading={loading}
+					formats={formats}
+					quality={quality}
+					layout={layout}
+					width={828}
+					widths={widths}
+					sizes={sizes}
+					dataCoverImg={true}
+					showLqip={false}
+					showOverlay={false}
+					fadeIn={false}
+				/>
+			</noscript>
+		</>
+	)}
+
+	<!-- 固定本地图片 -->
+	{isLocal && !autoCoverKey && (
 		<ImageWrapper
 			src={src}
 			basePath={basePath}
@@ -211,14 +249,62 @@ const remoteReferrerPolicy =
 </style>
 
 <script>
+	function materializeAutoCover(container: Element): HTMLImageElement | null {
+		const coverKey = container.getAttribute('data-auto-cover-key');
+		if (!coverKey) return null;
+
+		const templates = Array.from(
+			document.querySelectorAll<HTMLTemplateElement>(
+				'#auto-cover-pool template[data-auto-cover-template]',
+			),
+		);
+		if (templates.length === 0) return null;
+
+		const storageKey = `firefly:auto-cover:${coverKey}`;
+		let previousSrc = '';
+		try {
+			previousSrc = sessionStorage.getItem(storageKey) || '';
+		} catch {}
+
+		const candidates =
+			templates.length > 1
+				? templates.filter((template) => template.dataset.autoCoverSrc !== previousSrc)
+				: templates;
+		const selected = candidates[Math.floor(Math.random() * candidates.length)];
+		if (!selected) return null;
+
+		const fragment = selected.content.cloneNode(true) as DocumentFragment;
+		const img = fragment.querySelector<HTMLImageElement>('img[data-cover-img]');
+		const slot = container.querySelector<HTMLElement>('.auto-cover-slot');
+		if (!img || !slot) return null;
+
+		img.alt = container.getAttribute('data-cover-alt') || img.alt;
+		img.loading = container.getAttribute('data-cover-loading') === 'eager' ? 'eager' : 'lazy';
+		const placeholder = container.querySelector<HTMLElement>('.lqip-placeholder');
+		const lqipStyle = selected.dataset.autoCoverLqip;
+		if (placeholder && lqipStyle) placeholder.setAttribute('style', lqipStyle);
+
+		slot.replaceChildren(fragment);
+		try {
+			sessionStorage.setItem(storageKey, selected.dataset.autoCoverSrc || '');
+		} catch {}
+		return img;
+	}
+
 	function initCoverImages() {
 		const containers = document.querySelectorAll('.cover-image-container');
 		containers.forEach((container) => {
 			if (container.hasAttribute('data-initialized')) return;
 			container.setAttribute('data-initialized', 'true');
 
-			const img = container.querySelector('img[data-cover-img]') as HTMLImageElement | null;
-			if (!img) return;
+			const img =
+				materializeAutoCover(container) ||
+				(container.querySelector('img[data-cover-img]') as HTMLImageElement | null);
+			if (!img) {
+				container.setAttribute('data-loading', 'false');
+				container.setAttribute('data-error', 'true');
+				return;
+			}
 
 			// 解析API URL列表，用于按顺序重试
 			let apiUrls: string[] = [];

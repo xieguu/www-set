@@ -269,6 +269,7 @@ const seriesData = await getSeriesPosts(entry);
               class="h-full"
               preview={false}
               apiUrls={apiUrls}
+			  autoCoverKey={isAutoCover(entry.data.image) ? entry.id : undefined}
             />
             <div class="absolute inset-x-4 top-3 z-10 flex flex-wrap items-center justify-end gap-x-3 gap-y-1 text-xs font-medium text-white drop-shadow-[0_1px_2px_rgb(0_0_0/0.9)]">
               <div class="flex items-center gap-1 whitespace-nowrap">
@@ -429,6 +430,7 @@ const seriesData = await getSeriesPosts(entry);
               preview={false}
               naturalHeight
               apiUrls={apiUrls}
+			  autoCoverKey={isAutoCover(entry.data.image) ? entry.id : undefined}
             />
           </div>
         )

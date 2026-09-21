@@ -1,0 +1,36 @@
+---
+import ImageWrapper from "@/components/common/ImageWrapper.astro";
+import { getAutoCoverPaths } from "@/utils/image-utils";
+import { getLqipProps } from "@/utils/lqip-utils";
+
+const autoCovers = getAutoCoverPaths().map((src) => ({
+	src,
+	lqipStyle: getLqipProps(src, "").style,
+}));
+---
+
+<div id="auto-cover-pool" hidden aria-hidden="true">
+	{
+		autoCovers.map(({ src, lqipStyle }) => (
+			<template
+				data-auto-cover-template
+				data-auto-cover-src={src}
+				data-auto-cover-lqip={lqipStyle}
+			>
+				<ImageWrapper
+					src={src}
+					basePath=""
+					alt=""
+					class="w-full h-full"
+					loading="lazy"
+					width={828}
+					widths={[640, 828]}
+					sizes="(max-width: 768px) 100vw, 828px"
+					dataCoverImg={true}
+					showLqip={false}
+					showOverlay={false}
+				/>
+			</template>
+		))
+	}
+</div>
