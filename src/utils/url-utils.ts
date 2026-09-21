@@ -54,16 +54,6 @@ export function getCategoryUrl(category: string | null): string {
 	return url(`/archive/?category=${encodeURIComponent(category.trim())}`);
 }
 
-export function getDir(path: string): string {
-	// 移除文件扩展名
-	const pathWithoutExt = removeFileExtension(path);
-	const lastSlashIndex = pathWithoutExt.lastIndexOf("/");
-	if (lastSlashIndex < 0) {
-		return "/";
-	}
-	return pathWithoutExt.substring(0, lastSlashIndex + 1);
-}
-
 export function getFileDirFromPath(filePath: string): string {
 	return filePath.replace(/^src\//, "").replace(/\/[^/]+$/, "");
 }
@@ -84,11 +74,11 @@ export function getCanonicalUrl(urlObj: URL): string {
 }
 
 export function url(path: string): string {
-	// 关键修复：如果是网络URL，直接返回原地址
+	// 网络 URL、协议链接与页内锚点不添加站点 BASE_URL。
 	if (
-		path.startsWith("http://") ||
-		path.startsWith("https://") ||
-		path.startsWith("//")
+		/^[a-z][a-z\d+.-]*:/i.test(path) ||
+		path.startsWith("//") ||
+		path.startsWith("#")
 	) {
 		return path;
 	}

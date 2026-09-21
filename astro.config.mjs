@@ -1,5 +1,4 @@
 import { setMaxListeners } from "node:events";
-import cloudflare from "@astrojs/cloudflare";
 import { unified } from "@astrojs/markdown-remark";
 import mdx from "@astrojs/mdx";
 import sitemap from "@astrojs/sitemap";
@@ -108,17 +107,30 @@ function activeTranslationPlugin() {
 	};
 }
 
-const adapter = process.env.CF_WORKERS
-	? cloudflare({
-			prerenderEnvironment: "node",
-		})
-	: undefined;
+function resolveBasePath(value) {
+	const trimmed = value?.trim();
+	if (!trimmed || trimmed === "/") return "/";
+	if (
+		!trimmed.startsWith("/") ||
+		trimmed.startsWith("//") ||
+		trimmed.includes("\\") ||
+		trimmed.includes("?") ||
+		trimmed.includes("#")
+	) {
+		throw new Error(
+			`BASE_PATH must be a root-relative path such as /www-set: ${trimmed}`,
+		);
+	}
+	return `/${trimmed.split("/").filter(Boolean).join("/")}`;
+}
+
+const SITE_BASE = resolveBasePath(process.env.BASE_PATH);
 
 // https://astro.build/config
 export default defineConfig({
 	site: siteConfig.site_url,
 
-	base: "/",
+	base: SITE_BASE,
 	trailingSlash: "always",
 
 	// 字体配置 - 只加载实际使用的字体，跳过未引用的以加快构建
@@ -157,8 +169,6 @@ export default defineConfig({
 			});
 	})(),
 
-	adapter,
-
 	// 图像优化配置
 	image: {
 		// 组件可自行传入 layout/widths；这里只控制 Markdown 正文图片
@@ -183,7 +193,7 @@ export default defineConfig({
 			cache: true,
 			preload: {
 				hover: true,
-				visible: true,
+				visible: false,
 			},
 			accessibility: true,
 			updateHead: true,
@@ -287,7 +297,11 @@ export default defineConfig({
 			filter: (page) => {
 				// 根据页面开关配置过滤sitemap
 				const url = new URL(page);
-				const pathname = url.pathname;
+				const pathname =
+					SITE_BASE !== "/" && url.pathname.startsWith(`${SITE_BASE}/`)
+						? url.pathname.slice(SITE_BASE.length)
+						: url.pathname;
+				if (pathname.startsWith("/admin/")) return false;
 				if (pathname === "/dynamic/" && !siteConfig.pages.dynamic) {
 					return false;
 				}

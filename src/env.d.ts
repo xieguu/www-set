@@ -3,6 +3,12 @@
 
 declare global {
 	interface ImportMetaEnv {
+		readonly PUBLIC_SITE_URL?: string;
+		readonly PUBLIC_CMS_REPO?: string;
+		readonly PUBLIC_CMS_BRANCH?: string;
+		readonly PUBLIC_CMS_AUTH_BASE_URL?: string;
+		readonly PUBLIC_CMS_PROXY_URL?: string;
+		readonly PUBLIC_TWIKOO_ENV_ID?: string;
 		readonly MEILI_MASTER_KEY: string;
 		// 视图设置面板总开关，可在部署平台配置（true / 1 / on / yes 开启）
 		readonly PUBLIC_DISPLAY_SETTINGS?: string;

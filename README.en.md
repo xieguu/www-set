@@ -133,7 +133,7 @@ If you have useful features and optimizations, please submit a [Pull Request](ht
 
 ### Platform Hosting Deployment
 - **Refer to the [official guide](https://docs.astro.build/en/guides/deploy/) to deploy your blog to Vercel, Netlify, Cloudflare Pages, EdgeOne Pages, etc.**
-- **Vercel**, **Netlify** and other major platforms auto-deploy, automatically selecting the appropriate adapter based on the environment.
+- The project builds a static site and does not require a server adapter. Set `PUBLIC_SITE_URL` to the final HTTPS origin before building.
 
    Framework Preset: `Astro`
 

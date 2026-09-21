@@ -3,21 +3,24 @@ import I18nKey from "@i18n/i18nKey";
 import { i18n } from "@i18n/translation";
 import { getCategoryUrl } from "@utils/url-utils";
 
+const titleSegmenter = new Intl.Segmenter("zh", { granularity: "word" });
+const titleTokenCache = new Map<string, Set<string>>();
+
 // // Retrieve posts and sort them by publication date
 async function getRawSortedPosts() {
 	const allBlogPosts = await getCollection("posts", ({ data }) => {
 		return import.meta.env.PROD ? data.draft !== true : true;
 	});
 
-	const sorted = allBlogPosts.sort((a, b) => {
+	const sorted = allBlogPosts.sort((leftPost, rightPost) => {
 		// 首先按置顶状态排序，置顶文章在前
-		if (a.data.pinned && !b.data.pinned) return -1;
-		if (!a.data.pinned && b.data.pinned) return 1;
+		if (leftPost.data.pinned && !rightPost.data.pinned) return -1;
+		if (!leftPost.data.pinned && rightPost.data.pinned) return 1;
 
 		// 如果置顶状态相同，则按发布日期排序
-		const dateA = new Date(a.data.published);
-		const dateB = new Date(b.data.published);
-		return dateA > dateB ? -1 : 1;
+		return (
+			rightPost.data.published.getTime() - leftPost.data.published.getTime()
+		);
 	});
 	return sorted;
 }
@@ -226,12 +229,15 @@ export async function getCategoryList(): Promise<Category[]> {
  * 过滤标点和空白，英文统一小写
  */
 function tokenizeTitle(title: string): Set<string> {
+	const cachedTokens = titleTokenCache.get(title);
+	if (cachedTokens) return cachedTokens;
+
 	const tokens = new Set<string>();
-	const segmenter = new Intl.Segmenter("zh", { granularity: "word" });
-	for (const { segment, isWordLike } of segmenter.segment(title)) {
+	for (const { segment, isWordLike } of titleSegmenter.segment(title)) {
 		if (!isWordLike) continue;
 		tokens.add(segment.toLowerCase());
 	}
+	titleTokenCache.set(title, tokens);
 	return tokens;
 }
 

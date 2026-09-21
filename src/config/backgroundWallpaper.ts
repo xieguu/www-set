@@ -41,8 +41,7 @@ export const backgroundWallpaper: BackgroundWallpaperConfig = {
 		// 想手动指定就换成单张字符串或数组，例如：
 		// desktop: "assets/images/DesktopWallpaper/d1.avif",
 		desktop: "auto",
-		// "auto"：自动收录 src/assets/images/MobileWallpaper/ 目录下的全部图片
-		mobile: "auto",
+		// 未单独配置 mobile 时，移动端复用 desktop 图片集合。
 		// 背景视频播放地址
 		// 支持单个视频路径（字符串）或多个视频循环（数组，参考上面壁纸配置）
 		// 支持远程视频URL，本地视频请放在 public/assets/videos/ 目录下

@@ -9,7 +9,7 @@ import { glob } from "glob";
 import { live2dWidgetConfig, spineModelConfig } from "../src/config";
 import { resolveSiteRoot } from "./site-root";
 
-// Cloudflare Pages 上产物在 dist/client，本地在 dist，统一对准真实根目录
+// 统一从构建产物根目录执行后处理。
 const DIST_DIR = resolveSiteRoot();
 
 // 看板娘资源根目录（相对 dist/），两种看板娘都关掉时整个删掉

@@ -79,6 +79,7 @@ const getDynamicNavBarConfig = (): NavBarConfig => {
 
 			// MyAnimeList
 			LinkPresets.MAL,
+			LinkPresets.Admin,
 		],
 	});
 
@@ -145,6 +146,12 @@ export const navBarSearchConfig: NavBarSearchConfig = {
 // Link Presets - Allows free customization of the name, icon, and URL of navigation bar links
 // ============================================================================
 export const LinkPresets: Record<string, NavBarLink> = {
+	Admin: {
+		name: "创作中心",
+		url: "/admin/",
+		external: true,
+		icon: "material-symbols:edit-note",
+	},
 	Home: {
 		name: "主页",
 		url: "/",

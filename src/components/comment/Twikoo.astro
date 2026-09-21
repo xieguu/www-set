@@ -1,4 +1,6 @@
 ---
+import twikooScriptUrl from "twikoo/dist/twikoo.nocss.js?url";
+import "twikoo/dist/twikoo.css";
 import { commentConfig } from "@/config/commentConfig";
 import { url } from "@/utils/url-utils";
 
@@ -6,90 +8,35 @@ interface Props {
 	path: string;
 }
 
-const twikooConfig = commentConfig.twikoo ?? { envId: "" };
-const jsUrl =
-	twikooConfig.jsUrl ||
-	"https://registry.npmmirror.com/twikoo/1.7.13/files/dist/twikoo.min.js";
-const cssUrl = twikooConfig.cssUrl;
+const twikooConfig = commentConfig.twikoo;
+if (!twikooConfig?.envId) {
+	throw new Error("Twikoo requires PUBLIC_TWIKOO_ENV_ID or an explicit envId.");
+}
+
 const config = {
-	...twikooConfig,
-	el: "#tcomment",
+	envId: twikooConfig.envId,
+	region: twikooConfig.region,
+	lang: twikooConfig.lang,
 	path: Astro.props.path,
 };
+const scriptUrl = twikooConfig.jsUrl || twikooScriptUrl;
+const cssUrl = twikooConfig.cssUrl;
 ---
 
-<div id="tcomment"></div>
-<script is:inline src={jsUrl} defer></script>
-{cssUrl && <link rel="stylesheet" href={cssUrl.startsWith("http") ? cssUrl : url(cssUrl)} />}
-<script is:inline define:vars={{ config }}>
-  // 获取当前页面路径
-  function getCurrentPath() {
-    const requestedPath = new URLSearchParams(window.location.search).get("path");
-    if (requestedPath) return requestedPath;
-    const pathname = window.location.pathname;
-    return pathname.endsWith("/") && pathname.length > 1
-      ? pathname.slice(0, -1)
-      : pathname;
-  }
+<firefly-twikoo data-config={JSON.stringify(config)} data-script-url={scriptUrl}>
+	<p data-comment-status role="status">滚动到此处后加载评论…</p>
+	<button type="button" data-comment-retry hidden class="btn-regular rounded-lg px-4 py-2">重新加载评论</button>
+	<div id="tcomment"></div>
+</firefly-twikoo>
+{cssUrl && <link rel="stylesheet" href={url(cssUrl)} />}
 
-  // 动态创建配置对象
-  function createTwikooConfig() {
-    return {
-      ...config,
-      path: getCurrentPath(),
-      el: "#tcomment",
-    };
-  }
-
-  // 初始化 Twikoo
-  function initTwikoo() {
-    if (typeof twikoo !== "undefined") {
-      const commentEl = document.getElementById("tcomment");
-      if (commentEl) {
-        commentEl.innerHTML = "";
-
-        const dynamicConfig = createTwikooConfig();
-        console.log("[Twikoo] Init config:", dynamicConfig);
-
-        twikoo
-          .init(dynamicConfig)
-          .then(() => {
-            console.log("[Twikoo] Init complete");
-          })
-          .catch((error) => {
-            console.error("[Twikoo] Init failed:", error);
-          });
-      }
-    } else {
-      // 如果 Twikoo 未加载，稍后重试
-      setTimeout(initTwikoo, 500);
-    }
-  }
-
-  // 页面加载时初始化
-  document.addEventListener("DOMContentLoaded", initTwikoo);
-
-  // Swup 页面切换后重新初始化
-  if (window.swup && window.swup.hooks) {
-    window.swup.hooks.on("content:replace", function () {
-      setTimeout(initTwikoo, 200);
-    });
-  } else {
-    document.addEventListener("swup:enable", function () {
-      if (window.swup && window.swup.hooks) {
-        window.swup.hooks.on("content:replace", function () {
-          setTimeout(initTwikoo, 200);
-        });
-      }
-    });
-  }
-
-  // 自定义事件监听
-  document.addEventListener("firefly:page:loaded", function () {
-    const commentEl = document.getElementById("tcomment");
-    if (commentEl) {
-      console.log("[Twikoo] Re-initializing via custom event");
-      initTwikoo();
-    }
-  });
+<script>
+	import { registerTwikooComments } from "./twikoo-comments";
+	registerTwikooComments();
 </script>
+
+<style>
+	firefly-twikoo { display: block; min-height: 120px; }
+	[data-comment-status] { color: var(--content-meta); margin: 12px 0; }
+	[data-comment-retry][hidden] { display: none; }
+</style>

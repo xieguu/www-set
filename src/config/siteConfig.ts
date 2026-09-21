@@ -1,6 +1,6 @@
 import type { SiteConfig } from "@/types/siteConfig";
 import { resolvePageToggles } from "../utils/page-toggle-utils";
-import { resolveSiteLang } from "../utils/site-config-utils";
+import { resolveSiteLang, resolveSiteUrl } from "../utils/site-config-utils";
 
 // 定义站点语言
 // 语言代码，例如：'zh_CN', 'zh_TW', 'en', 'ja', 'ru', 'ko'。
@@ -48,7 +48,7 @@ export const siteConfig: SiteConfig = {
 	subtitle: "众水的女王，为你独家上演",
 
 	// 站点 URL
-	site_url: "https://firefly.cuteleaf.cn",
+	site_url: resolveSiteUrl("http://localhost:4321"),
 
 	// 站点描述
 	description:

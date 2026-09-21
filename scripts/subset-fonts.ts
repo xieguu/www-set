@@ -13,7 +13,7 @@ import { resolveSiteRoot } from "./site-root";
 
 // ─── 配置 ───────────────────────────────────────────────
 
-// Cloudflare Pages 上产物在 dist/client，本地在 dist，统一对准真实根目录
+// 统一从构建产物根目录执行后处理。
 const siteRoot = resolveSiteRoot();
 const DIST_DIR = siteRoot;
 const OUTPUT_DIR = `${siteRoot}/_astro/fonts`;

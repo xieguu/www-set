@@ -93,6 +93,5 @@ LQIP data is generated into `src/constants/lqips.json` and committed — regener
 ## Deployment
 
 - **Vercel** (default, `vercel.json`)
-- **Cloudflare Workers** (`wrangler.jsonc`, set `CF_WORKERS` env var)
+- **Cloudflare Workers** (`wrangler.jsonc`, static assets from `dist/`)
 - Static output to `dist/`
-

@@ -6,14 +6,15 @@ import type { SiteConfig } from "@/types/siteConfig";
 
 // 读取站点语言环境变量（Vite/Astro 走 import.meta.env，构建脚本回退 process.env）
 function readSiteLangEnv(): string | undefined {
+	let raw: unknown;
 	try {
-		const raw = (import.meta.env as Record<string, unknown>).PUBLIC_SITE_LANG;
-		return typeof raw === "string" && raw.trim() ? raw.trim() : undefined;
-	} catch {
-		return typeof process === "undefined"
-			? undefined
-			: process.env.PUBLIC_SITE_LANG;
+		raw = (import.meta.env as Record<string, unknown>).PUBLIC_SITE_LANG;
+	} catch {}
+	if (typeof raw !== "string" || !raw.trim()) {
+		raw =
+			typeof process === "undefined" ? undefined : process.env.PUBLIC_SITE_LANG;
 	}
+	return typeof raw === "string" && raw.trim() ? raw.trim() : undefined;
 }
 
 // 规整成 SiteConfig.lang 的合法取值，无法识别时返回 undefined（回退到默认值）
@@ -45,6 +46,46 @@ export function resolveSiteLang(
 	defaultLang: SiteConfig["lang"],
 ): SiteConfig["lang"] {
 	return normalizeSiteLang(readSiteLangEnv()) ?? defaultLang;
+}
+
+function readSiteUrlEnv(): string | undefined {
+	let raw: unknown;
+	try {
+		raw = (import.meta.env as Record<string, unknown>).PUBLIC_SITE_URL;
+	} catch {}
+	if (typeof raw !== "string" || !raw.trim()) {
+		raw =
+			typeof process === "undefined" ? undefined : process.env.PUBLIC_SITE_URL;
+	}
+	return typeof raw === "string" && raw.trim() ? raw.trim() : undefined;
+}
+
+/** Resolve and validate the canonical site origin used by feeds, SEO and CMS. */
+export function resolveSiteUrl(defaultUrl: string): string {
+	const value = readSiteUrlEnv() ?? defaultUrl;
+	let parsed: URL;
+	try {
+		parsed = new URL(value);
+	} catch {
+		throw new Error(
+			`PUBLIC_SITE_URL must be an absolute HTTP(S) URL: ${value}`,
+		);
+	}
+
+	if (
+		(parsed.protocol !== "http:" && parsed.protocol !== "https:") ||
+		parsed.username ||
+		parsed.password ||
+		parsed.search ||
+		parsed.hash ||
+		(parsed.pathname !== "/" && parsed.pathname !== "")
+	) {
+		throw new Error(
+			`PUBLIC_SITE_URL must contain only an HTTP(S) origin, without credentials, path, query or hash: ${value}`,
+		);
+	}
+
+	return parsed.origin;
 }
 
 // 由语言代码生成 OpenGraph og:locale（language_TERRITORY 格式）。

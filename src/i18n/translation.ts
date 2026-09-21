@@ -12,12 +12,6 @@ export type Translation = {
 // en 作为最终兜底：当前语言缺某个 key（留空）时回退，保证不出现空串。
 const defaultTranslation = en;
 
-// 站点语言在构建期固定，运行时只存在 activeTranslation。
-// 保留形参仅为兼容旧签名（此前会按传入语言查表）。
-export function getTranslation(_lang?: string): Translation {
-	return activeTranslation;
-}
-
 export function i18n(key: I18nKey): string {
 	return activeTranslation[key] || defaultTranslation[key];
 }

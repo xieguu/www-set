@@ -7,6 +7,8 @@
 - 响应式博客首页、文章页、归档、分类、标签与全文搜索
 - 亮色、暗色和跟随系统三种主题模式
 - Markdown / MDX 内容，支持数学公式、代码高亮、Mermaid、PlantUML 与提示块
+- 创作中心 `/admin/`：可视化编写 Markdown、保存草稿、上传图片、发布与管理文章
+- Twikoo 评论与回复，支持服务端持久化、评论审核和管理员设置
 - 动态、友链、留言板、项目展示、相册、书签导航、打赏和关于页面
 - RSS、Atom、Sitemap、robots.txt 与 Open Graph 元数据
 - 本地图片优化、LQIP 占位和文章随机本地封面
@@ -47,6 +49,18 @@ pnpm preview     # 本地预览生产构建
 ```
 
 ## 内容管理
+
+### 可视化发布与评论
+
+```bash
+pnpm dev:blog
+```
+
+打开 `http://127.0.0.1:4321/admin/` 进入创作中心。在本地编辑器点击“登录”即可管理文章；新文章默认是草稿，关闭“草稿”并点击“发布 → 立即发布”后保存为 `src/content/posts/<文章地址>.md`。本地保存不会自动提交或推送 Git。
+
+此命令一起启动博客、Decap 文件代理和 Twikoo 评论服务。评论默认存放在 `.local/twikoo/`，刷新页面或重启服务不会清空；请备份该目录。文章的“允许评论”开关决定是否显示评论区。
+
+线上发布需要配置 GitHub OAuth 和评论服务地址，静态文件本身不能接收写入。完整步骤、端口配置、评论管理与部署说明见 [博客发布与评论](docs/blog-authoring.md)。
 
 ### 新建文章
 
@@ -129,7 +143,11 @@ pnpm build
 | 输出目录 | `dist` |
 | Node.js | `22.23.0` 或更高版本 |
 
-Cloudflare Workers 适配器已包含在项目中；设置 `CF_WORKERS` 环境变量后会在构建时启用。
+部署时必须将 `PUBLIC_SITE_URL` 设置为站点最终的 HTTPS origin（例如 `https://blog.example.com`，不带路径），用于 canonical、RSS、Sitemap、Open Graph 与线上创作中心配置。
+
+Cloudflare Workers 使用 Wrangler 的静态资产发布：把 `PUBLIC_SITE_URL` 设置为最终 HTTPS origin 后运行 `pnpm deploy:cloudflare`。该命令会先校验域名、完成全量构建，再发布 `dist/`。
+
+推送 `main` 后，GitHub Actions 会自动以 `/www-set/` 为基础路径部署 GitHub Pages：<https://xieguu.github.io/www-set/>。
 
 ## 项目结构
 

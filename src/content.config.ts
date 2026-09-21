@@ -59,12 +59,18 @@ type ContentCollection<T> = CollectionConfig<
 	ReturnType<typeof glob>
 >;
 
+const postDate = z.union([
+	z.date(),
+	z.iso.date().pipe(z.coerce.date()),
+	z.iso.datetime({ offset: true }).pipe(z.coerce.date()),
+]);
+
 const postsCollection: ContentCollection<PostData> = defineCollection({
 	loader: glob({ pattern: "**/*.{md,mdx}", base: "./src/content/posts" }),
 	schema: z.object({
 		title: z.string(),
-		published: z.date(),
-		updated: z.date().optional(),
+		published: postDate,
+		updated: postDate.optional(),
 		draft: z.boolean().optional().default(false),
 		description: z.string().optional().default(""),
 		image: z.string().optional().default(""),
