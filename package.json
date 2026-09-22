@@ -89,14 +89,14 @@
     "stylus": "^0.64.0",
     "svelte": "^5.57.0",
     "tailwindcss": "^4.3.3",
-    "takumi-js": "^2.13.7",
+    "takumi-js": "^2.14.0",
     "tkserver": "1.7.24",
     "tsx": "^4.23.13",
     "twikoo": "1.7.24",
     "typescript": "^6.0.3",
     "unified": "^11.0.5",
     "unist-util-visit": "^5.1.0",
-    "wrangler": "^4.127.1"
+    "wrangler": "^4.135.0"
   },
   "devDependencies": {
     "@astrojs/ts-plugin": "^1.10.11",
