@@ -17,6 +17,8 @@
 
 这座剧场基于 **Astro** 框架搭建，使用了 [Firefly](https://github.com/CuteLeaf/Firefly) 主题（源自 [Fuwari](https://github.com/saicaca/fuwari) 的二次开发）。在此一并致谢这些优秀的开源作品。
 
+::github{repo="xieguu/www-set"}
+
 ::github{repo="CuteLeaf/Firefly"}
 
 ::github{repo="saicaca/fuwari"}

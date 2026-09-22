@@ -4,6 +4,7 @@ export type SponsorMethod = {
 	icon?: string; // 图标名称（Iconify 格式），如 "fa7-brands:alipay"
 	qrCode?: string; // 收款码图片路径（相对于 public 目录），可选
 	link?: string; // 打赏链接 URL，可选。如果提供，会显示跳转按钮
+	placeholderText?: string; // 链接未配置时显示的占位文本
 	description?: string; // 描述文本
 	enabled: boolean; // 是否启用
 };

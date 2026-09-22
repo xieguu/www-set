@@ -10,5 +10,11 @@
 		"language": "Astro",
 		"avatarUrl": "https://avatars.githubusercontent.com/u/25200299?v=4",
 		"license": "MIT"
+	},
+	"xieguu/www-set": {
+		"description": "芙宁娜网站",
+		"language": "Astro",
+		"avatarUrl": "https://avatars.githubusercontent.com/u/177377125?v=4",
+		"license": "MIT"
 	}
 }

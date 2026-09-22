@@ -107,6 +107,16 @@ function getQrLqipProps(qrCode: string) {
                             <Icon name="fa7-solid:arrow-up-right-from-square" class="text-sm" />
                           </a>
                         )}
+
+						{!method.link && method.placeholderText && (
+							<span
+								class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-dashed border-neutral-300 dark:border-neutral-700 bg-neutral-100 dark:bg-neutral-800 text-neutral-500 dark:text-neutral-400 font-medium cursor-not-allowed"
+								aria-disabled="true"
+							>
+								<Icon name="fa7-solid:link-slash" class="text-sm" />
+								<span>{method.placeholderText}</span>
+							</span>
+						)}
                       </div>
                     ))}
         </div>
@@ -203,5 +213,4 @@ function getQrLqipProps(qrCode: string) {
     background-color: oklch(from var(--primary) l c h / 0.15) !important;
   }
 </style>
-
 
