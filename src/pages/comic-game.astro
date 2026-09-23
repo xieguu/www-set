@@ -1,0 +1,41 @@
+---
+import chapter01 from "@/assets/images/comic-game/chapter-01.webp?url";
+import ComicGame from "@/components/pages/comic-game/ComicGame.svelte";
+import MainGridLayout from "@/layouts/MainGridLayout.astro";
+import { url } from "@/utils/url-utils";
+
+const title = "折月人 · 互动漫画";
+const description =
+	"一部以漫画分镜讲述的原创选择叙事游戏：在被删改的记忆回潮之前，决定折潮城最后一版如何印刷。";
+---
+
+<MainGridLayout title={title} description={description} heading={title}>
+	<link
+		slot="head"
+		rel="preload"
+		as="image"
+		href={chapter01}
+		fetchpriority="high"
+	/>
+	<div class="comic-game-mount" data-pagefind-ignore>
+		<ComicGame client:load homeHref={url("/")} />
+		<noscript>
+			<p>《折月人》需要启用 JavaScript 才能保存选择并推进漫画分镜。</p>
+		</noscript>
+	</div>
+</MainGridLayout>
+
+<style>
+	.comic-game-mount {
+		min-height: 8rem;
+	}
+
+	.comic-game-mount noscript {
+		display: block;
+		padding: 2rem;
+		border-radius: 1rem;
+		background: var(--card-bg);
+		color: var(--content);
+		text-align: center;
+	}
+</style>
